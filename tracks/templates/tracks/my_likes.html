@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Мои лайки ❤️</h2>
+
+{% if tracks %}
+    <ul>
+        {% for track in tracks %}
+            <li style="margin-bottom: 20px;">
+                <strong>{{ track.title }}</strong><br>
+                {% if track.cover %}
+                    <img src="{{ track.cover.url }}" alt="Обложка" width="100">
+                {% endif %}
+                <br>
+                <audio controls>
+                    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудио.
+                </audio>
+                <br>
+                <a href="{% url 'track_detail' track.pk %}">Подробнее</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Вы ещё не лайкнули ни одного трека.</p>
+{% endif %}
+{% endblock %}

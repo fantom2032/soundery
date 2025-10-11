@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Мои треки</h2>
+
+{% if tracks %}
+    <ul>
+        {% for track in tracks %}
+            <li style="margin-bottom: 20px;">
+                <strong>{{ track.title }}</strong><br>
+                {% if track.cover %}
+                    <img src="{{ track.cover.url }}" alt="Обложка" width="100">
+                {% endif %}
+                <br>
+                <audio controls>
+                    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудио.
+                </audio>
+                <br>
+                <a href="{% url 'track_detail' track.pk %}">Подробнее</a> |
+                <form method="post" action="{% url 'delete_track' track.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('Удалить трек?')">🗑️ Удалить</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Вы ещё не загрузили ни одного трека.</p>
+{% endif %}
+{% endblock %}

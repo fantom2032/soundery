@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <h2>Профиль: {{ profile_user.username }}</h2>
+    {% if profile_user == user %}
+        <p>Это ваш профиль 🎧</p>
+    {% endif %}
+    <hr>
+
+    <h3>Загруженные треки</h3>
+    {% if tracks %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for track in tracks %}
+                <li style="margin-bottom: 15px;">
+                    {% if track.cover %}
+                        <img src="{{ track.cover.url }}" width="80" height="80" style="vertical-align: middle;">
+                    {% endif %}
+                    <a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a>
+                    {% if profile_user == user %}
+                        <form action="{% url 'delete_track' track.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="color:red;">Удалить</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет загруженных треков.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Плейлисты</h3>
+    {% if playlists %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for playlist in playlists %}
+                <li>
+                    <a href="{% url 'playlist_detail' playlist.pk %}">{{ playlist.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет созданных плейлистов.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

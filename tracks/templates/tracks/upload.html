@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Загрузить трек</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="text" name="title" placeholder="Название трека" required><br>
+  <input type="file" name="audio_file" accept="audio/*" required><br>
+  <input type="file" name="cover" accept="image/*"><br>
+  <button type="submit">Загрузить</button>
+</form>
+{% endblock %}

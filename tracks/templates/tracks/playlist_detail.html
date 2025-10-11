@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Плейлист: {{ playlist.name }}</h2>
+
+{% if playlist.tracks.all %}
+    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+        {% for track in playlist.tracks.all %}
+            <div style="border: 1px solid #ccc; padding: 10px; width: 250px; border-radius: 10px; text-align: center;">
+                
+                <h3>{{ track.title }}</h3>
+
+                {% if track.cover %}
+                    <img src="{{ track.cover.url }}" alt="Обложка" width="200" style="border-radius: 10px;">
+                {% else %}
+                    <div style="width: 200px; height: 200px; background: #eee; display: flex; align-items: center; justify-content: center;">
+                        <span>Без обложки</span>
+                    </div>
+                {% endif %}
+
+                <audio controls style="width: 100%; margin-top: 10px;">
+                    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудио.
+                </audio>
+
+                <p>Загрузил: {{ track.uploaded_by.username }}</p>
+
+                <a href="{% url 'track_detail' track.id %}">Подробнее</a>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>В этом плейлисте пока нет треков.</p>
+{% endif %}
+
+<p><a href="{% url 'my_playlists' %}">← Назад к моим плейлистам</a></p>
+{% endblock %}

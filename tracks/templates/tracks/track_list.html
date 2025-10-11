@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Все треки</h2>
+
+<div class="track-list">
+    {% for track in tracks %}
+        <div class="track-card">
+            {% if track.cover %}
+                <img src="{{ track.cover.url }}" alt="{{ track.title }}" class="track-cover">
+            {% else %}
+                <img src="/static/default_cover.jpg" alt="Нет обложки" class="track-cover">
+            {% endif %}
+
+            <h3>
+                <a href="{% url 'track_detail' track.pk %}">
+                    {{ track.title }}
+                </a>
+            </h3>
+
+            <audio controls>
+                <source src="{{ track.audio_file.url }}" type="audio/mpeg">
+                Ваш браузер не поддерживает аудио.
+            </audio>
+
+            <p>Лайков: {{ track.likes.count }} ❤️</p>
+<p>Загрузил: 
+  {% if track.uploaded_by %}
+      <a href="{% url 'user_profile' track.uploaded_by.username %}">
+          {{ track.uploaded_by.username }}
+      </a>
+  {% else %}
+      Неизвестный пользователь
+  {% endif %}
+</p>
+
+
+        </div>
+    {% empty %}
+        <p>Пока нет треков</p>
+    {% endfor %}
+</div>
+
+<style>
+.track-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+.track-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    background: #f9f9f9;
+}
+.track-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}

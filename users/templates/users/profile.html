@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Профиль: {{ profile_user.username }}</h2>
+
+    <h3>Загруженные треки</h3>
+    {% if user_tracks %}
+        <ul>
+            {% for track in user_tracks %}
+                <li>{{ track.title }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Этот пользователь ещё не загрузил треков.</p>
+    {% endif %}
+
+    <h3>Плейлисты</h3>
+    {% if user_playlists %}
+        <ul>
+            {% for playlist in user_playlists %}
+                <li>{{ playlist.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет созданных плейлистов.</p>
+    {% endif %}
+</div>
+{% endblock %}

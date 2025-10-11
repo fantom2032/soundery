@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Мои плейлисты</h2>
+
+{% for playlist in playlists %}
+    <div style="margin-bottom: 15px;">
+        <a href="{% url 'playlist_detail' playlist.id %}">{{ playlist.name }}</a>
+    </div>
+{% empty %}
+    <p>У вас пока нет плейлистов.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ track.title }}</h2>
+
+{% if track.cover %}
+    <img src="{{ track.cover.url }}" alt="Обложка" width="200">
+{% endif %}
+
+<audio controls style="display:block; margin-top:10px;">
+    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио.
+</audio>
+
+<p>Загрузил: 
+  {% if track.uploaded_by %}
+      <a href="{% url 'user_profile' track.uploaded_by.username %}">
+          {{ track.uploaded_by.username }}
+      </a>
+  {% else %}
+      Неизвестный пользователь
+  {% endif %}
+</p>
+
+
+
+{% if user.is_authenticated %}
+    <form action="{% url 'like_track' track.pk %}" method="post">
+        {% csrf_token %}
+        {% if user_liked %}
+            <button type="submit">💔 Убрать лайк</button>
+        {% else %}
+            <button type="submit">❤️ Лайкнуть</button>
+        {% endif %}
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Войдите</a>, чтобы поставить лайк.</p>
+{% endif %}
+
+<hr>
+
+<h3>Комментарии</h3>
+
+{% if user.is_authenticated %}
+    <h4>Оставить комментарий</h4>
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="text" rows="3" placeholder="Ваш комментарий..." required></textarea>
+        <button type="submit">Добавить</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Войдите</a>, чтобы комментировать.</p>
+{% endif %}
+
+<ul style="list-style-type: none; padding-left: 0;">
+    {% for comment in comments %}
+        <li style="margin-bottom: 15px;">
+            <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
+            <br>
+            <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+
+            {% if user.is_authenticated %}
+                <form method="post" style="margin-top: 5px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    <textarea name="text" rows="1" placeholder="Ответить..." required></textarea>
+                    <button type="submit">Ответить</button>
+                </form>
+            {% endif %}
+
+            {% if comment.replies.all %}
+                <ul style="margin-left: 20px; list-style-type: none;">
+                    {% for reply in comment.replies.all %}
+                        <li style="margin-top: 10px;">
+                            <strong>{{ reply.user.username }}</strong>: {{ reply.text }}
+                            <br>
+                            <small>{{ reply.created_at|date:"d.m.Y H:i" }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>Пока нет комментариев.</li>
+    {% endfor %}
+</ul>
+
+
+
+{% endblock %}
