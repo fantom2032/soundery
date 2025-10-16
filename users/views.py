@@ -37,12 +37,10 @@ def logout_view(request):
 
 
 
-def profile_view(request, username):
-    user = get_object_or_404(User, username=username)
-    user_tracks = Track.objects.filter(user=user)
-    user_playlists = Playlist.objects.filter(user=user)
-    return render(request, 'users/profile.html', {
-        'profile_user': user,
-        'user_tracks': user_tracks,
-        'user_playlists': user_playlists,
-    })
+@login_required
+def profile_view(request, username=None):
+    if username:
+        user = get_object_or_404(User, username=username)
+    else:
+        user = request.user 
+    return render(request, 'users/profile.html', {'profile_user': user})

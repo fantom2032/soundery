@@ -111,12 +111,12 @@ def my_playlists(request):
 
 @login_required
 def playlist_detail(request, playlist_id):
-    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+    playlist = get_object_or_404(Playlist, id=playlist_id)
     return render(request, 'tracks/playlist_detail.html', {'playlist': playlist})
 
 @login_required
 def add_to_playlist(request, track_id):
-    track = get_object_or_404(Track, id=track_id, uploaded_by=request.user)
+    track = get_object_or_404(Track, id=track_id)
 
     if request.method == "POST":
         playlist_id = request.POST.get("playlist_id")
@@ -125,4 +125,21 @@ def add_to_playlist(request, track_id):
         return redirect("track_detail", pk=track.id)
 
     playlists = Playlist.objects.filter(user=request.user)
-    return render(request, "tracks/add_to_playlist.html", {"track": track, "playlists": playlists})
+    return render(request, "tracks/add_to_playlist.html", {
+        "track": track,
+        "playlists": playlists
+    })
+
+
+@login_required
+def remove_from_playlist(request, playlist_id, track_id):
+    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+    track = get_object_or_404(Track, id=track_id)
+
+    if track in playlist.tracks.all():
+        playlist.tracks.remove(track)
+        messages.success(request, f'Трек "{track.title}" удалён из плейлиста "{playlist.name}".')
+    else:
+        messages.warning(request, 'Этого трека нет в этом плейлисте.')
+
+    return redirect('playlist_detail', playlist_id=playlist.id)

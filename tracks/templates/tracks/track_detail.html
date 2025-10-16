@@ -20,6 +20,7 @@
       Неизвестный пользователь
   {% endif %}
 </p>
+<p class="upload-time">Загружено: {{ track.created_at|date:"d.m.Y H:i" }}</p>
 
 
 
@@ -35,6 +36,13 @@
 {% else %}
     <p><a href="{% url 'login' %}">Войдите</a>, чтобы поставить лайк.</p>
 {% endif %}
+<br>
+<form action="{% url 'add_to_playlist' track.id %}" method="get">
+    <button type="submit" 
+            style="background-color:#2196F3; color:white; padding:10px 15px; border:none; border-radius:5px; cursor:pointer;">
+        ➕ Добавить в плейлист
+    </button>
+</form>
 
 <hr>
 

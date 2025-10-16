@@ -2,11 +2,22 @@
 {% block content %}
 <h2>Мои плейлисты</h2>
 
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'create_playlist' %}" class="btn btn-primary" 
+       style="background-color:#4CAF50; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">
+        ➕ Создать новый плейлист
+    </a>
+</div>
+
+<ul>
 {% for playlist in playlists %}
-    <div style="margin-bottom: 15px;">
-        <a href="{% url 'playlist_detail' playlist.id %}">{{ playlist.name }}</a>
-    </div>
+    <li>
+        <a href="{% url 'playlist_detail' playlist.id %}">
+            🎵 {{ playlist.name }}
+        </a> — {{ playlist.tracks.count }} треков
+    </li>
 {% empty %}
     <p>У вас пока нет плейлистов.</p>
 {% endfor %}
+</ul>
 {% endblock %}

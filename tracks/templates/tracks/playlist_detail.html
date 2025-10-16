@@ -25,6 +25,11 @@
                 <p>Загрузил: {{ track.uploaded_by.username }}</p>
 
                 <a href="{% url 'track_detail' track.id %}">Подробнее</a>
+
+                 <form action="{% url 'remove_from_playlist' playlist.id track.id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="remove-btn">Удалить</button>
+        </form>
             </div>
         {% endfor %}
     </div>

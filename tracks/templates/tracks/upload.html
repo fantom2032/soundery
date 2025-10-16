@@ -3,9 +3,13 @@
 <h2>Загрузить трек</h2>
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
+  <p>Название</p>
   <input type="text" name="title" placeholder="Название трека" required><br>
+  <p>Аудиофайл</p>
   <input type="file" name="audio_file" accept="audio/*" required><br>
+  <p>Обложка</p>
   <input type="file" name="cover" accept="image/*"><br>
+  <br>
   <button type="submit">Загрузить</button>
 </form>
 {% endblock %}

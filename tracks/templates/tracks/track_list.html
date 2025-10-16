@@ -3,7 +3,7 @@
 {% block content %}
 <h2>Все треки</h2>
 
-<div class="track-list">
+<div class="track-container">
     {% for track in tracks %}
         <div class="track-card">
             {% if track.cover %}
@@ -33,6 +33,7 @@
       Неизвестный пользователь
   {% endif %}
 </p>
+<p class="upload-time">Загружено: {{ track.created_at|date:"d.m.Y H:i" }}</p>
 
 
         </div>
@@ -41,25 +42,5 @@
     {% endfor %}
 </div>
 
-<style>
-.track-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-.track-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    background: #f9f9f9;
-}
-.track-cover {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-</style>
+
 {% endblock %}
