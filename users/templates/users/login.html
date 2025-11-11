@@ -1,10 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Вход</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Войти</button>
-  </form>
-  <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Вход</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="error-message">{{ field.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary">Войти</button>
+        </form>
+        <p class="auth-text">
+            Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+        </p>
+    </div>
+</div>
 {% endblock %}

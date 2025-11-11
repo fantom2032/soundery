@@ -1,10 +1,15 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Все треки</h2>
+<h2 style="text-align:center;">🎵 Треки</h2>
 
-<div class="track-container">
-    {% for track in tracks %}
+<form method="get" style="text-align:center; margin-bottom:20px;">
+    <input type="text" name="q" placeholder="Поиск треков..." value="{{ request.GET.q }}" 
+           style="padding:8px; width:300px; border-radius:8px; border:none;">
+    <button type="submit" style="padding:8px 12px; background:#1DB954; color:white; border:none; border-radius:6px;">Найти</button>
+</form>
+
+<div class="track-list">
+    {% for track in page_obj %}
         <div class="track-card">
             {% if track.cover %}
                 <img src="{{ track.cover.url }}" alt="{{ track.title }}" class="track-cover">
@@ -12,35 +17,127 @@
                 <img src="/static/default_cover.jpg" alt="Нет обложки" class="track-cover">
             {% endif %}
 
-            <h3>
-                <a href="{% url 'track_detail' track.pk %}">
-                    {{ track.title }}
-                </a>
-            </h3>
+            <h3><a href="{% url 'track_detail' track.pk %}" class="track-link">{{ track.title }}</a></h3>
 
-            <audio controls>
-                <source src="{{ track.audio_file.url }}" type="audio/mpeg">
-                Ваш браузер не поддерживает аудио.
-            </audio>
+            <div class="custom-player">
+                <audio src="{{ track.audio_file.url }}" class="audio-element"></audio>
+                <div class="controls">
+                    <button class="play-pause">▶</button>
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <span class="time">0:00</span>
+                </div>
+            </div>
 
-            <p>Лайков: {{ track.likes.count }} ❤️</p>
-<p>Загрузил: 
-  {% if track.uploaded_by %}
-      <a href="{% url 'user_profile' track.uploaded_by.username %}">
-          {{ track.uploaded_by.username }}
-      </a>
-  {% else %}
-      Неизвестный пользователь
-  {% endif %}
-</p>
-<p class="upload-time">Загружено: {{ track.created_at|date:"d.m.Y H:i" }}</p>
+            <p>❤️ {{ track.likes.count }}</p>
+            <p>
+                Загрузил:
+                {% if track.uploaded_by %}
+                    <a href="{% url 'profile' track.uploaded_by.username %}" >
+                        {{ track.uploaded_by.username }}
+                    </a>
+                {% else %}
+                    Неизвестный пользователь
+                {% endif %}
+            </p>
 
-
+            <p>📅 {{ track.created_at|date:"d.m.Y" }}</p>
         </div>
     {% empty %}
         <p>Пока нет треков</p>
     {% endfor %}
 </div>
 
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">← Назад</a>
+    {% endif %}
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Вперёд →</a>
+    {% endif %}
+</div>
 
+<style>
+.track-list { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
+.track-card { background:#181818; border-radius:10px; padding:15px; width:220px; text-align:center; box-shadow:0 0 10px rgba(0,0,0,0.3); }
+.track-cover { width:100%; height:200px; object-fit:cover; border-radius:8px; margin-bottom:10px; }
+.pagination { text-align:center; margin-top:30px; }
+.pagination a { background:#1DB954; color:white; padding:8px 14px; border-radius:5px; margin:0 5px; text-decoration:none; }
+.pagination span { color:#aaa; margin:0 10px; }
+.artist-link {
+    color: #bbb;
+    text-decoration: none;
+}
+
+.artist-link:hover {
+    color: #1DB954;
+}
+</style>
+
+<script>
+document.querySelectorAll('.custom-player').forEach(player => {
+    const audio = player.querySelector('.audio-element');
+    const playPause = player.querySelector('.play-pause');
+    const progressContainer = player.querySelector('.progress-container');
+    const progressBar = player.querySelector('.progress-bar');
+    const timeDisplay = player.querySelector('.time');
+    let isDragging = false;
+
+    playPause.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+            playPause.textContent = '⏸';
+        } else {
+            audio.pause();
+            playPause.textContent = '▶';
+        }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        if (!isDragging) {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = progress + '%';
+            timeDisplay.textContent = formatTime(audio.currentTime);
+        }
+    });
+
+    progressContainer.addEventListener('click', e => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        audio.currentTime = (clickX / width) * duration;
+    });
+
+    progressContainer.addEventListener('mousedown', () => {
+        isDragging = true;
+        progressBar.style.transition = 'none';
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (isDragging) {
+            const rect = progressContainer.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const progress = Math.max(0, Math.min(1, offsetX / rect.width));
+            progressBar.style.width = (progress * 100) + '%';
+        }
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (isDragging) {
+            isDragging = false;
+            progressBar.style.transition = 'width 0.15s ease'; 
+            const rect = progressContainer.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const newTime = (offsetX / rect.width) * audio.duration;
+            audio.currentTime = Math.max(0, Math.min(audio.duration, newTime));
+        }
+    });
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+});
+</script>
 {% endblock %}

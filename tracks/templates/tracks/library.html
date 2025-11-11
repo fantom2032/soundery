@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="max-width: 1000px; margin: 0 auto; text-align: center;">
+    <h2>🎧 Медиатека</h2>
+
+<form method="get" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию или описанию альбома...">
+    <button type="submit">🔍</button>
+</form>
+
+    {% if saved_albums %}
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+            {% for album in saved_albums %}
+                <div style="border: 1px solid #ccc; border-radius: 10px; padding: 15px; width: 220px;">
+                    {% if album.cover %}
+                        <img src="{{ album.cover.url }}" style="width:100%; border-radius:8px; margin-bottom:10px;">
+                    {% endif %}
+                    <h3>{{ album.title }}</h3>
+                    <p>
+                Загружен: 
+                {% if album.artist %}
+                    <a href="{% url 'profile' album.artist.username %}" class="artist-link">
+                        {{ album.artist.username }}
+                    </a>
+                {% else %}
+                    Неизвестный пользователь
+                {% endif %}
+            </p>
+                    <a href="{% url 'album_detail' album.id %}" style="display:block; margin-top:5px;">Открыть</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Вы ещё не сохраняли альбомы ❤️</p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,30 +1,222 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Мои треки</h2>
+<div class="container">
+    <h2 class="page-title">Мои треки</h2>
 
-{% if tracks %}
-    <ul>
-        {% for track in tracks %}
-            <li style="margin-bottom: 20px;">
-                <strong>{{ track.title }}</strong><br>
-                {% if track.cover %}
-                    <img src="{{ track.cover.url }}" alt="Обложка" width="100">
-                {% endif %}
-                <br>
-                <audio controls>
-                    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
-                    Ваш браузер не поддерживает аудио.
-                </audio>
-                <br>
-                <a href="{% url 'track_detail' track.pk %}">Подробнее</a> |
-                <form method="post" action="{% url 'delete_track' track.pk %}" style="display:inline;">
+        <form method="get" class="search-bar">
+        <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию трека...">
+        <button type="submit">🔍</button>
+    </form>
+    {% if tracks %}
+        <div class="track-grid">
+            {% for track in tracks %}
+                <div class="track-card">
+                    {% if track.cover %}
+                        <img src="{{ track.cover.url }}" alt="{{ track.title }}" class="track-cover">
+                    {% else %}
+                        <img src="/static/default_cover.jpg" alt="Обложка" class="track-cover">
+                    {% endif %}
+                    <h3><a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a></h3>
+                    <div class="custom-player">
+                <audio src="{{ track.audio_file.url }}" class="audio-element"></audio>
+                <div class="controls">
+                    <button class="play-pause">▶</button>
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <span class="time">0:00</span>
+                </div>
+            </div>
+                    <form action="{% url 'delete_track' track.id %}" method="post" onsubmit="return confirm('Вы действительно хотите удалить этот трек?');">
                     {% csrf_token %}
-                    <button type="submit" onclick="return confirm('Удалить трек?')">🗑️ Удалить</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Вы ещё не загрузили ни одного трека.</p>
-{% endif %}
+                     <button type="submit" style="background-color:#e53935; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">
+                            🗑️ Удалить трек
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-message">Вы ещё не загрузили ни одного трека.</p>
+    {% endif %}
+</div>
+
+<style>
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 30px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+.search-bar input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: #fff;
+}
+.search-bar button {
+    padding: 10px 20px;
+    background: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+.track-grid,
+.album-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.track-card,
+.album-card {
+    width: 220px;                 
+    height: 320px;                
+    background: #181818;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.track-card:hover,
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(29,185,84,0.4);
+}
+
+.track-cover,
+.album-cover {
+    width: 100%;
+    height: 150px;        
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.track-card h3 a,
+.album-card h3 a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.track-card h3 a:hover,
+.album-card h3 a:hover {
+    color: #1DB954;
+}
+
+.album-date {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.player {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.delete-btn {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.empty-message {
+    text-align: center;
+    color: #aaa;
+    margin-top: 20px;
+}
+</style>
+<script>
+document.querySelectorAll('.custom-player').forEach(player => {
+    const audio = player.querySelector('.audio-element');
+    const playPause = player.querySelector('.play-pause');
+    const progressContainer = player.querySelector('.progress-container');
+    const progressBar = player.querySelector('.progress-bar');
+    const timeDisplay = player.querySelector('.time');
+    let isDragging = false;
+
+    playPause.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+            playPause.textContent = '⏸';
+        } else {
+            audio.pause();
+            playPause.textContent = '▶';
+        }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        if (!isDragging) {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = progress + '%';
+            timeDisplay.textContent = formatTime(audio.currentTime);
+        }
+    });
+
+    progressContainer.addEventListener('click', e => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        audio.currentTime = (clickX / width) * duration;
+    });
+
+    progressContainer.addEventListener('mousedown', () => {
+        isDragging = true;
+        progressBar.style.transition = 'none';
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (isDragging) {
+            const rect = progressContainer.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const progress = Math.max(0, Math.min(1, offsetX / rect.width));
+            progressBar.style.width = (progress * 100) + '%';
+        }
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (isDragging) {
+            isDragging = false;
+            progressBar.style.transition = 'width 0.15s ease'; 
+            const rect = progressContainer.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const newTime = (offsetX / rect.width) * audio.duration;
+            audio.currentTime = Math.max(0, Math.min(audio.duration, newTime));
+        }
+    });
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+});
+
+</script>
 {% endblock %}

@@ -1,26 +1,174 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Мои лайки ❤️</h2>
-
+<h2 style="text-align:center; margin-bottom:30px;">Мои лайки ❤️</h2>
+<form method="get" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию трека или альбома...">
+    <button type="submit">🔍</button>
+</form>
 {% if tracks %}
-    <ul>
-        {% for track in tracks %}
-            <li style="margin-bottom: 20px;">
-                <strong>{{ track.title }}</strong><br>
-                {% if track.cover %}
-                    <img src="{{ track.cover.url }}" alt="Обложка" width="100">
+<div class="track-list">
+    {% for track in tracks %}
+        <div class="track-card">
+            {% if track.cover %}
+                <img src="{{ track.cover.url }}" alt="Обложка {{ track.title }}" class="track-cover">
+            {% else %}
+                <img src="/static/default_cover.jpg" alt="Нет обложки" class="track-cover">
+            {% endif %}
+
+            <h3><a href="{% url 'track_detail' track.pk %}" class="track-link">{{ track.title }}</a></h3>
+
+            <div class="custom-player">
+                <audio src="{{ track.audio_file.url }}" class="audio-element"></audio>
+                <div class="controls">
+                    <button class="play-pause">▶</button>
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <span class="time">0:00</span>
+                </div>
+            </div>
+
+            <p>❤️ {{ track.likes.count }}</p>
+            <p>
+                Загружен: 
+                {% if track.uploaded_by %}
+                    <a href="{% url 'profile' track.uploaded_by.username %}" class="artist-link">
+                        {{ track.uploaded_by.username }}
+                    </a>
+                {% else %}
+                    Неизвестный пользователь
                 {% endif %}
-                <br>
-                <audio controls>
-                    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
-                    Ваш браузер не поддерживает аудио.
-                </audio>
-                <br>
-                <a href="{% url 'track_detail' track.pk %}">Подробнее</a>
-            </li>
-        {% endfor %}
-    </ul>
+            </p>
+        </div>
+    {% endfor %}
+</div>
 {% else %}
-    <p>Вы ещё не лайкнули ни одного трека.</p>
+    <p style="text-align:center; color:#aaa;">Вы ещё не лайкнули ни одного трека.</p>
 {% endif %}
+
+<style>
+.track-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.track-card {
+    background: #181818;
+    border-radius: 12px;
+    padding: 15px;
+    width: 220px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.track-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
+}
+
+.track-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.track-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.track-link:hover {
+    color: #1DB954;
+}
+
+.artist-link {
+    color: #bbb;
+    text-decoration: none;
+}
+
+.artist-link:hover {
+    color: #1DB954;
+}
+
+.custom-player {
+    margin-top: 10px;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.play-pause {
+    background: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.progress-container {
+    background: #333;
+    width: 80px;
+    height: 5px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: #1DB954;
+    width: 0%;
+    height: 100%;
+}
+
+.time {
+    color: #aaa;
+    font-size: 0.8em;
+}
+
+h2 {
+    color: #fff;
+    font-size: 1.8em;
+}
+</style>
+
+<script>
+document.querySelectorAll('.custom-player').forEach(player => {
+  const audio = player.querySelector('.audio-element');
+  const playPause = player.querySelector('.play-pause');
+  const progressContainer = player.querySelector('.progress-container');
+  const progressBar = player.querySelector('.progress-bar');
+  const timeDisplay = player.querySelector('.time');
+  let isDragging = false;
+  playPause.addEventListener('click', () => {
+    if (audio.paused) { audio.play(); playPause.textContent = '⏸'; }
+    else { audio.pause(); playPause.textContent = '▶'; }
+  });
+  audio.addEventListener('timeupdate', () => {
+    if (!isDragging) {
+      const progress = (audio.currentTime / audio.duration) * 100;
+      progressBar.style.width = progress + '%';
+      timeDisplay.textContent = formatTime(audio.currentTime);
+    }
+  });
+  progressContainer.addEventListener('click', e => {
+    const width = progressContainer.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+  });
+  function formatTime(sec){const m=Math.floor(sec/60);const s=Math.floor(sec%60);return`${m}:${s.toString().padStart(2,'0')}`;}
+});
+</script>
 {% endblock %}

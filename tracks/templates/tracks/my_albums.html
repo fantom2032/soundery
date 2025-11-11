@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="page-title">Мои альбомы</h2>
+
+    <form method="get" class="search-bar">
+        <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию альбома...">
+        <button type="submit">🔍</button>
+    </form>
+
+    {% if albums %}
+        <div class="album-grid">
+            {% for album in albums %}
+                <div class="album-card">
+                    {% if album.cover %}
+                        <img src="{{ album.cover.url }}" alt="{{ album.title }}" class="album-cover">
+                    {% else %}
+                        <img src="/static/default_cover.jpg" alt="Обложка" class="album-cover">
+                    {% endif %}
+                    <h3>
+                        <a href="{% url 'album_detail' album.id %}">{{ album.title }}</a>
+                    </h3>
+                    <p class="album-date">Создан: {{ album.created_at|date:"d.m.Y" }}</p>
+
+                    <form action="{% url 'delete_album' album.id %}" method="post" onsubmit="return confirm('Вы действительно хотите удалить этот альбом?');">
+                        {% csrf_token %}
+                        <button type="submit" style="background-color:#e53935; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">
+                            🗑️ Удалить альбом
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-message">У вас пока нет альбомов.</p>
+    {% endif %}
+</div>
+
+<style>
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 30px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+.search-bar input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: #fff;
+}
+.search-bar button {
+    padding: 10px 20px;
+    background: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+.track-grid,
+.album-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.track-card,
+.album-card {
+    width: 220px;                 
+    height: 320px;                
+    background: #181818;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.track-card:hover,
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(29,185,84,0.4);
+}
+
+.track-cover,
+.album-cover {
+    width: 100%;
+    height: 150px;        
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.track-card h3 a,
+.album-card h3 a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.track-card h3 a:hover,
+.album-card h3 a:hover {
+    color: #1DB954;
+}
+
+.album-date {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.player {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.delete-btn {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.empty-message {
+    text-align: center;
+    color: #aaa;
+    margin-top: 20px;
+}
+</style>
+{% endblock %}

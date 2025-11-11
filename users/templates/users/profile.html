@@ -1,24 +1,76 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 {% block content %}
-<div class="container">
+<div style="max-width: 1000px; margin: 0 auto; text-align: center;">
     <h2>Профиль: {{ profile_user.username }}</h2>
+    {% if profile_user == user %}<p>Это ваш профиль 🎧</p>{% endif %}
+    <hr>
+
+    <form method="get" style="margin-bottom:20px;">
+        <input type="text" name="q" placeholder="Поиск по трекам и альбомам..." value="{{ request.GET.q }}" 
+               style="padding:8px; width:300px; border-radius:8px; border:none;">
+        <button type="submit" style="padding:8px 12px; background:#1DB954; color:white; border:none; border-radius:6px;">Поиск</button>
+    </form>
 
     <h3>Загруженные треки</h3>
-    {% if user_tracks %}
-        <ul>
-            {% for track in user_tracks %}
-                <li>{{ track.title }}</li>
+    {% if tracks %}
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+            {% for track in tracks %}
+                <div style="border: 1px solid #ccc; border-radius: 10px; padding: 15px; width: 200px;">
+                    {% if track.cover %}
+                        <img src="{{ track.cover.url }}" width="180" height="180" style="border-radius: 8px;">
+                    {% endif %}
+                    <p><a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a></p>
+                    {% if profile_user == user %}
+                        <form action="{% url 'delete_track' track.id %}" method="post" onsubmit="return confirm('Вы действительно хотите удалить этот трек?');">
+                            {% csrf_token %}
+                            <button type="submit" style="background-color:#e53935; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">
+                                🗑️ Удалить трек
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
-        <p>Этот пользователь ещё не загрузил треков.</p>
+        <p>Нет треков по запросу.</p>
     {% endif %}
 
+    <hr>
+
+      <h3>Альбомы</h3>
+    {% if albums %}
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+            {% for album in albums %}
+                <div style="border: 1px solid #ccc; border-radius: 10px; padding: 15px; width: 220px;">
+                    {% if album.cover %}
+                        <img src="{{ album.cover.url }}" alt="{{ album.title }}" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+                    {% else %}
+                        <img src="{% static 'images/default_cover.jpg' %}" alt="Нет обложки" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+                    {% endif %}
+                    <a href="{% url 'album_detail' album.id %}" style="display: block; margin-top: 5px;">{{ album.title }}</a>
+                    {% if request.user == profile_user %}
+                        <form action="{% url 'delete_album' album.id %}" method="post" onsubmit="return confirm('Вы действительно хотите удалить этот альбом?');">
+                       {% csrf_token %}
+                       <button type="submit" style="background-color:#e53935; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">
+                           🗑️ Удалить альбом
+                       </button>
+                      </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Нет альбомов по запросу.</p>
+    {% endif %}
+
+    <hr>
+
     <h3>Плейлисты</h3>
-    {% if user_playlists %}
-        <ul>
-            {% for playlist in user_playlists %}
-                <li>{{ playlist.name }}</li>
+    {% if playlists %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for playlist in playlists %}
+                <li><a href="{% url 'playlist_detail' playlist.pk %}">{{ playlist.name }}</a></li>
             {% endfor %}
         </ul>
     {% else %}

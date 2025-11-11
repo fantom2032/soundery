@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2 style="text-align:center;">🎵 Альбомы</h2>
+
+<form method="get" style="text-align:center; margin-bottom:20px;">
+    <input type="text" name="q" placeholder="Поиск альбомов..." value="{{ request.GET.q }}" 
+           style="padding:8px; width:300px; border-radius:8px; border:none;">
+    <button type="submit" style="padding:8px 12px; background:#1DB954; color:white; border:none; border-radius:6px;">Найти</button>
+</form>
+
+<div class="track-list">
+    {% if page_obj %}
+        {% for album in page_obj %}
+            <div class="track-card">
+                {% if album.cover %}
+                    <img src="{{ album.cover.url }}" alt="{{ album.title }}" class="track-cover">
+                {% else %}
+                    <img src="{% static 'images/default_cover.jpg' %}" alt="No cover" class="track-cover">
+                {% endif %}
+                <h3><a href="{% url 'album_detail' album.id %}">{{ album.title }}</a></h3>
+                <p>
+                    Загрузил:
+                    <a href="{% url 'profile' album.artist.username %}">
+                        {{ album.artist.username }}
+                    </a>
+                </p>
+                <p>📅 {{ album.created_at|date:"d.m.Y" }}</p>
+            </div>
+        {% empty %}
+            <p>Пока нет альбомов</p>
+        {% endfor %}
+    {% else %}
+        <p>Пока нет альбомов</p>
+    {% endif %}
+</div>
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">← Назад</a>
+    {% endif %}
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Вперёд →</a>
+    {% endif %}
+</div>
+<style>
+.track-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.track-card {
+    background: #181818;
+    border-radius: 10px;
+    padding: 15px;
+    width: 220px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.track-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.pagination a {
+    background: #1DB954;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 5px;
+    margin: 0 5px;
+    text-decoration: none;
+}
+
+.pagination span {
+    color: #aaa;
+    margin: 0 10px;
+}
+</style>
+{% endblock %}

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Track, Like, Comment, Favorite
+from .models import Track, Like, Comment
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)

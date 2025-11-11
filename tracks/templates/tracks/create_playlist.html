@@ -1,9 +1,96 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>Создать плейлист</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Создать</button>
-</form>
+<div class="container">
+    <h2 class="page-title">Создать плейлист</h2>
+
+    <div class="form-wrapper">
+        <form method="POST" class="playlist-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_name">Название</label>
+                {{ form.name }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_description">Описание</label>
+                {{ form.description }}
+            </div>
+
+            <button type="submit" class="create-btn">Создать</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 600px;
+    margin: 60px auto;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+}
+
+.page-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+.form-wrapper {
+    background: #181818;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #ccc;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 15px;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 5px #1DB954;
+}
+
+textarea {
+    resize: none;
+    height: 100px;
+}
+
+.create-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #1DB954;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.create-btn:hover {
+    background: #17a74a;
+}
+</style>
 {% endblock %}

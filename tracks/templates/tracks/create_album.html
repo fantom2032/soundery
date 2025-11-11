@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="album-create-container">
+  <h2>🎶 Создать альбом</h2>
+
+
+  <form method="get" class="num-tracks-form">
+    <label for="num_tracks">Количество треков:</label>
+    <input type="number" id="num_tracks" name="num_tracks" min="1" max="20" value="{{ num_tracks|default:0 }}">
+    <button type="submit" class="btn-confirm">Подтвердить</button>
+  </form>
+
+  <hr class="divider">
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="num_tracks" value="{{ num_tracks }}">
+
+    <div class="form-section">
+      <p>Название альбома</p>
+      {{ album_form.title }}
+
+      <p>Описание</p>
+      {{ album_form.description }}
+
+      <p>Обложка</p>
+      {{ album_form.cover }}
+
+      <p>Жанр (необязательно)</p>
+      {{ album_form.genre }}
+    </div>
+
+    {% if track_forms %}
+      <h3 class="track-title">Добавьте {{ num_tracks }} трек(ов)</h3>
+      {% for form in track_forms %}
+        <div class="track-form">
+          <h4>🎵 Трек {{ forloop.counter }}</h4>
+          {{ form.as_p }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="submit-btn">Создать альбом</button>
+    {% else %}
+      <p class="hint-text">Выберите количество треков и нажмите <strong>«Подтвердить»</strong>.</p>
+    {% endif %}
+  </form>
+</div>
+<style>
+body {
+  background-color: #121212;
+  color: #f1f1f1;
+  font-family: "Roboto", sans-serif;
+}
+
+.album-create-container {
+  background: #1e1e1e;
+  padding: 40px;
+  border-radius: 16px;
+  max-width: 750px;
+  margin: 60px auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+.album-create-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+}
+
+.num-tracks-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.num-tracks-form label {
+  color: #ccc;
+  font-weight: 500;
+}
+
+.num-tracks-form input[type="number"] {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #2b2b2b;
+  color: #f1f1f1;
+  text-align: center;
+}
+
+.btn-confirm {
+  background-color: #1db954;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.btn-confirm:hover {
+  background-color: #1ed760;
+  transform: scale(1.03);
+}
+
+.divider {
+  border: none;
+  height: 1px;
+  background: #333;
+  margin: 25px 0;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 12px;
+  color: #ccc;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="file"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #2b2b2b;
+  color: #f1f1f1;
+  margin-top: 6px;
+  margin-bottom: 18px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #1db954;
+  background-color: #2e2e2e;
+  outline: none;
+}
+
+.track-title {
+  text-align: center;
+  color: #1db954;
+  margin-top: 25px;
+  margin-bottom: 20px;
+}
+
+.track-form {
+  background: #222;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.track-form h4 {
+  color: #1db954;
+  margin-bottom: 10px;
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  background: #1db954;
+  border: none;
+  color: white;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover {
+  background: #1ed760;
+  transform: scale(1.02);
+}
+
+.hint-text {
+  text-align: center;
+  color: #bbb;
+  font-style: italic;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('input[type="file"]').forEach(input => {
+    if (input.name.toLowerCase().includes("audio")) {
+      input.setAttribute("accept", "audio/*");
+    }
+  });
+});
+</script>
+{% endblock %}

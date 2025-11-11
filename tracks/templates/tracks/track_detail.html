@@ -1,97 +1,322 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ track.title }}</h2>
+<div class="track-detail-container">
+    <h2>{{ track.title }}</h2>
 
-{% if track.cover %}
-    <img src="{{ track.cover.url }}" alt="Обложка" width="200">
-{% endif %}
+    {% if track.cover %}
+        <img src="{{ track.cover.url }}" alt="Обложка" class="track-cover">
+    {% endif %}
 
-<audio controls style="display:block; margin-top:10px;">
-    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио.
-</audio>
+    <div class="custom-player">
+        <audio src="{{ track.audio_file.url }}" class="audio-element"></audio>
+        <div class="controls">
+            <button class="play-pause">▶</button>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <span class="time">0:00</span>
+        </div>
+    </div>
 
-<p>Загрузил: 
-  {% if track.uploaded_by %}
-      <a href="{% url 'user_profile' track.uploaded_by.username %}">
-          {{ track.uploaded_by.username }}
-      </a>
-  {% else %}
-      Неизвестный пользователь
-  {% endif %}
+    <p class="uploaded-by">
+        Загружено: 
+        {% if track.uploaded_by %}
+            <a href="{% url 'profile' track.uploaded_by.username %}" class="user-link">
+                {{ track.uploaded_by.username }}
+            </a>
+        {% else %}
+            Неизвестный пользователь
+        {% endif %}
+    </p>
+
+    {% if track.album %}
+        <p class="album-info">
+            Альбом: 
+            <a href="{% url 'album_detail' track.album.pk %}">
+                {{ track.album.title }}
+            </a>
+        </p>
+    {% endif %}
+    <p>Жанр: 
+    {% if track.genre %}
+        {{ track.genre }}
+    {% elif track.album and track.album.genre %}
+        {{ track.album.genre }}
+    {% else %}
+        Не указан
+    {% endif %}
 </p>
-<p class="upload-time">Загружено: {{ track.created_at|date:"d.m.Y H:i" }}</p>
 
+    <p class="upload-time">Загружено: {{ track.created_at|date:"d.m.Y H:i" }}</p>
 
-
-{% if user.is_authenticated %}
-    <form action="{% url 'like_track' track.pk %}" method="post">
+    <form action="{% url 'like_track' track.pk %}" method="post" class="like-form">
         {% csrf_token %}
         {% if user_liked %}
-            <button type="submit">💔 Убрать лайк</button>
+            <button type="submit" class="like-btn liked">💔 Убрать лайк</button>
         {% else %}
-            <button type="submit">❤️ Лайкнуть</button>
+            <button type="submit" class="like-btn">❤️ Лайкнуть</button>
         {% endif %}
     </form>
-{% else %}
-    <p><a href="{% url 'login' %}">Войдите</a>, чтобы поставить лайк.</p>
-{% endif %}
-<br>
-<form action="{% url 'add_to_playlist' track.id %}" method="get">
-    <button type="submit" 
-            style="background-color:#2196F3; color:white; padding:10px 15px; border:none; border-radius:5px; cursor:pointer;">
-        ➕ Добавить в плейлист
-    </button>
-</form>
 
-<hr>
+    <form action="{% url 'add_to_playlist' track.id %}" method="get" class="playlist-form">
+        <button type="submit" class="playlist-btn">➕ Добавить в плейлист</button>
+    </form>
 
-<h3>Комментарии</h3>
+    <hr class="divider">
 
-{% if user.is_authenticated %}
-    <h4>Оставить комментарий</h4>
-    <form method="post">
+    <h3>Комментарии</h3>
+
+    <form method="post" class="comment-form">
         {% csrf_token %}
         <textarea name="text" rows="3" placeholder="Ваш комментарий..." required></textarea>
-        <button type="submit">Добавить</button>
+        <button type="submit" class="comment-btn">Добавить</button>
     </form>
-{% else %}
-    <p><a href="{% url 'login' %}">Войдите</a>, чтобы комментировать.</p>
-{% endif %}
 
-<ul style="list-style-type: none; padding-left: 0;">
-    {% for comment in comments %}
-        <li style="margin-bottom: 15px;">
-            <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
-            <br>
-            <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+    <ul class="comment-list">
+        {% for comment in comments %}
+            <li class="comment">
+                <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
+                <br>
+                <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
 
-            {% if user.is_authenticated %}
-                <form method="post" style="margin-top: 5px;">
+                <form method="post" class="reply-form">
                     {% csrf_token %}
                     <input type="hidden" name="parent_id" value="{{ comment.id }}">
                     <textarea name="text" rows="1" placeholder="Ответить..." required></textarea>
-                    <button type="submit">Ответить</button>
+                    <button type="submit" class="reply-btn">Ответить</button>
                 </form>
-            {% endif %}
 
-            {% if comment.replies.all %}
-                <ul style="margin-left: 20px; list-style-type: none;">
-                    {% for reply in comment.replies.all %}
-                        <li style="margin-top: 10px;">
-                            <strong>{{ reply.user.username }}</strong>: {{ reply.text }}
-                            <br>
-                            <small>{{ reply.created_at|date:"d.m.Y H:i" }}</small>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </li>
-    {% empty %}
-        <li>Пока нет комментариев.</li>
-    {% endfor %}
-</ul>
+                {% if comment.replies.all %}
+                    <ul class="replies">
+                        {% for reply in comment.replies.all %}
+                            <li class="reply">
+                                <strong>{{ reply.user.username }}</strong>: {{ reply.text }}
+                                <br>
+                                <small>{{ reply.created_at|date:"d.m.Y H:i" }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>Пока нет комментариев.</li>
+        {% endfor %}
+    </ul>
 
+    <a href="{% url 'report_track' track.id %}" class="report-btn">🚨 Подать жалобу</a>
+</div>
 
+<style>
+.track-detail-container {
+    background: #181818;
+    color: #ddd;
+    padding: 30px;
+    border-radius: 14px;
+    max-width: 800px;
+    margin: 40px auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
 
+.track-detail-container h2 {
+    color: #1DB954;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.track-cover {
+    display: block;
+    margin: 0 auto 20px;
+    border-radius: 10px;
+    width: 250px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.custom-player {
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.play-pause {
+    background: #1DB954;
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.play-pause:hover {
+    background: #1ed760;
+}
+
+.progress-container {
+    flex: 1;
+    height: 6px;
+    background: #444;
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #1DB954;
+    width: 0;
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+.time {
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.like-form, .playlist-form {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.like-btn, .playlist-btn, .comment-btn, .reply-btn, .report-btn {
+    background: #1DB954;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.like-btn:hover, .playlist-btn:hover, .comment-btn:hover, .reply-btn:hover, .report-btn:hover {
+    background: #1ed760;
+}
+
+.like-btn.liked {
+    background: #e63946;
+}
+
+.comment-form textarea, .reply-form textarea {
+    width: 100%;
+    background: #222;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    margin-top: 10px;
+    resize: none;
+}
+
+.comment-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 20px;
+}
+
+.comment {
+    background: #222;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.replies {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.reply {
+    background: #2b2b2b;
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+.report-btn {
+    display: block;
+    margin: 20px auto 0;
+    text-align: center;
+    background: #ff4d4d;
+}
+
+.report-btn:hover {
+    background: #ff6666;
+}
+
+</style>
+
+<script>
+document.querySelectorAll('.custom-player').forEach(player => {
+    const audio = player.querySelector('.audio-element');
+    const playPause = player.querySelector('.play-pause');
+    const progressContainer = player.querySelector('.progress-container');
+    const progressBar = player.querySelector('.progress-bar');
+    const timeDisplay = player.querySelector('.time');
+    let isDragging = false;
+
+    playPause.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+            playPause.textContent = '⏸';
+        } else {
+            audio.pause();
+            playPause.textContent = '▶';
+        }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        if (!isDragging) {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = progress + '%';
+            timeDisplay.textContent = formatTime(audio.currentTime);
+        }
+    });
+
+    progressContainer.addEventListener('click', e => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        audio.currentTime = (clickX / width) * duration;
+    });
+
+    progressContainer.addEventListener('mousedown', () => {
+        isDragging = true;
+        progressBar.style.transition = 'none';
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (isDragging) {
+            const rect = progressContainer.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const progress = Math.max(0, Math.min(1, offsetX / rect.width));
+            progressBar.style.width = (progress * 100) + '%';
+        }
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (isDragging) {
+            isDragging = false;
+            progressBar.style.transition = 'width 0.15s ease'; 
+            const rect = progressContainer.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const newTime = (offsetX / rect.width) * audio.duration;
+            audio.currentTime = Math.max(0, Math.min(audio.duration, newTime));
+        }
+    });
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+});
+</script>
 {% endblock %}

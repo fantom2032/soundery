@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="report-container">
+    <h2>Подать жалобу на трек: "{{ track.title }}"</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="submit-btn">Отправить жалобу</button>
+    </form>
+
+    <p><a href="{% url 'track_detail' track.id %}" class="back-link">← Вернуться к треку</a></p>
+</div>
+
+<style>
+.report-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 25px;
+    background: #1e1e1e;
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+.report-container h2 {
+    margin-bottom: 20px;
+    color: #ff4b4b;
+}
+.form-group textarea {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    border: none;
+    padding: 10px;
+    background: #2a2a2a;
+    color: white;
+    resize: none;
+}
+.submit-btn {
+    background: #ff4b4b;
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+.submit-btn:hover {
+    background: #ff6b6b;
+}
+.back-link {
+    color: #aaa;
+    text-decoration: none;
+}
+.back-link:hover {
+    color: white;
+}
+</style>
+{% endblock %}

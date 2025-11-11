@@ -1,15 +1,112 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Загрузить трек</h2>
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  <p>Название</p>
-  <input type="text" name="title" placeholder="Название трека" required><br>
-  <p>Аудиофайл</p>
-  <input type="file" name="audio_file" accept="audio/*" required><br>
-  <p>Обложка</p>
-  <input type="file" name="cover" accept="image/*"><br>
-  <br>
-  <button type="submit">Загрузить</button>
-</form>
+<style>
+  body {
+    background-color: #121212;
+    color: #f1f1f1;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .upload-container {
+    max-width: 500px;
+    margin: 60px auto;
+    background: #1e1e1e;
+    padding: 35px 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  }
+
+  h2 {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 25px;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+  }
+
+  form p {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #ccc;
+  }
+
+  input[type="text"],
+  input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #2b2b2b;
+    color: #f1f1f1;
+    margin-bottom: 20px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="file"]:focus {
+    border-color: #1db954; /* Spotify green */
+    background-color: #2e2e2e;
+    outline: none;
+  }
+
+  button {
+    display: block;
+    width: 100%;
+    background-color: #1db954;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s ease;
+  }
+
+  button:hover {
+    background-color: #1ed760;
+    transform: scale(1.02);
+  }
+
+  .create-album-link {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #333;
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    transition: background 0.3s ease, transform 0.1s ease;
+  }
+
+  .create-album-link:hover {
+    background-color: #444;
+    transform: scale(1.02);
+  }
+</style>
+
+<div class="upload-container">
+  <h2>🎧 Загрузить трек</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>Название трека</p>
+    <input type="text" name="title" placeholder="Введите название..." required>
+
+    <p>Аудиофайл</p>
+    <input type="file" name="audio_file" accept="audio/*" required>
+
+    <p>Обложка</p>
+    <input type="file" name="cover" accept="image/*">
+
+    <p>Жанр (необязательно)</p>
+    <input type="text" name="genre" placeholder="Введите жанр...">
+    <button type="submit">Загрузить</button>
+
+    <a href="{% url 'create_album' %}" class="create-album-link">➕ Создать альбом</a>
+  </form>
+</div>
 {% endblock %}
